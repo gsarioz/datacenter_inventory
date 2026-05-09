@@ -1,11 +1,14 @@
+import hmac
 import os
+import secrets
 from datetime import datetime
 from ipaddress import ip_address, ip_network
 
 from dotenv import load_dotenv
-from flask import Flask, abort, flash, redirect, render_template, request, url_for
+from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
+from werkzeug.security import check_password_hash
 
 
 load_dotenv()
@@ -130,11 +133,38 @@ def create_app():
         "DATABASE_URL", "sqlite:///inventory.db"
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
     db.init_app(app)
 
+    register_security(app)
     register_routes(app)
     register_cli(app)
     return app
+
+
+def register_security(app):
+    @app.before_request
+    def require_login_and_csrf():
+        g.current_user = session.get("username")
+
+        if request.endpoint == "static":
+            return None
+
+        if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+            validate_csrf_token()
+
+        if request.endpoint == "login":
+            return None
+
+        if not g.current_user:
+            return redirect(url_for("login", next=safe_next_path()))
+
+        return None
+
+    @app.context_processor
+    def inject_security_helpers():
+        return {"csrf_token": csrf_token}
 
 
 def register_cli(app):
@@ -146,6 +176,30 @@ def register_cli(app):
 
 
 def register_routes(app):
+    @app.route("/login", methods=["GET", "POST"])
+    def login():
+        if session.get("username"):
+            return redirect(url_for("dashboard"))
+
+        if request.method == "POST":
+            username = request.form.get("username", "").strip()
+            password = request.form.get("password", "")
+            if authenticate_user(username, password):
+                session.clear()
+                session["username"] = username
+                csrf_token()
+                flash("Logged in.", "success")
+                return redirect(valid_redirect_target(request.form.get("next")))
+            flash("Invalid username or password.", "danger")
+
+        return render_template("login.html", next=valid_redirect_target(request.args.get("next")))
+
+    @app.post("/logout")
+    def logout():
+        session.clear()
+        flash("Logged out.", "success")
+        return redirect(url_for("login"))
+
     @app.route("/")
     def dashboard():
         totals = {
@@ -309,6 +363,58 @@ def category_label(category):
     if category not in ASSET_CATEGORIES:
         abort(404)
     return ASSET_CATEGORIES[category]
+
+
+def configured_users():
+    users = {}
+    for item in os.getenv("INVENTORY_USERS", "").split(","):
+        item = item.strip()
+        if not item or ":" not in item:
+            continue
+        username, password = item.split(":", 1)
+        username = username.strip()
+        if username:
+            users[username] = password.strip()
+    return users
+
+
+def authenticate_user(username, password):
+    stored_password = configured_users().get(username)
+    if not stored_password:
+        return False
+
+    if stored_password.startswith(("scrypt:", "pbkdf2:", "argon2:")):
+        try:
+            return check_password_hash(stored_password, password)
+        except ValueError:
+            return False
+
+    return hmac.compare_digest(stored_password, password)
+
+
+def csrf_token():
+    token = session.get("_csrf_token")
+    if not token:
+        token = secrets.token_urlsafe(32)
+        session["_csrf_token"] = token
+    return token
+
+
+def validate_csrf_token():
+    expected = session.get("_csrf_token")
+    provided = request.form.get("csrf_token") or request.headers.get("X-CSRF-Token")
+    if not expected or not provided or not hmac.compare_digest(expected, provided):
+        abort(400, description="Invalid CSRF token.")
+
+
+def safe_next_path():
+    return request.full_path if request.query_string else request.path
+
+
+def valid_redirect_target(target):
+    if target and target.startswith("/") and not target.startswith("//"):
+        return target
+    return url_for("dashboard")
 
 
 def get_datacenter(datacenter_id):

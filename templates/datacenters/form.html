@@ -9,6 +9,7 @@
 </header>
 
 <form class="form-grid" method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <label>Country
     <input name="country" value="{{ datacenter.country if datacenter else '' }}" required>
   </label>

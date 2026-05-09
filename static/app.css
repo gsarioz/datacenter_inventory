@@ -62,10 +62,74 @@ a {
   color: #ffffff;
 }
 
+.logout-form {
+  position: absolute;
+  right: 16px;
+  bottom: 18px;
+  left: 16px;
+  display: grid;
+  gap: 8px;
+  color: #dbe4ee;
+  font-size: 13px;
+}
+
+.logout-form button {
+  min-height: 34px;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background: #1f2937;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .main {
   min-height: 100vh;
   margin-left: 230px;
   padding: 28px;
+}
+
+.main-auth {
+  display: grid;
+  place-items: center;
+  margin-left: 0;
+}
+
+.login-shell {
+  width: min(100%, 420px);
+}
+
+.login-panel {
+  display: grid;
+  gap: 16px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+.login-panel h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.login-panel label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.login-panel input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 11px;
+  color: var(--ink);
+  font: inherit;
 }
 
 .page-header {
@@ -471,6 +535,11 @@ th {
 
   .sidebar nav {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .logout-form {
+    position: static;
+    margin-top: 16px;
   }
 
   .main {

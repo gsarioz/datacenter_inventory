@@ -7,18 +7,25 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
 </head>
 <body>
-  <aside class="sidebar">
-    <a class="brand" href="{{ url_for('dashboard') }}">DC Inventory</a>
-    <nav>
-      <a href="{{ url_for('dashboard') }}">Analytics</a>
-      <a href="{{ url_for('datacenters') }}">Datacenter</a>
-      <a href="{{ url_for('asset_list', category='servers') }}">Servers</a>
-      <a href="{{ url_for('asset_list', category='firewalls') }}">Firewalls</a>
-      <a href="{{ url_for('asset_list', category='switchs') }}">Switchs</a>
-      <a href="{{ url_for('asset_list', category='other-parts') }}">Other Parts</a>
-    </nav>
-  </aside>
-  <main class="main">
+  {% if g.current_user %}
+    <aside class="sidebar">
+      <a class="brand" href="{{ url_for('dashboard') }}">DC Inventory</a>
+      <nav>
+        <a href="{{ url_for('dashboard') }}">Analytics</a>
+        <a href="{{ url_for('datacenters') }}">Datacenter</a>
+        <a href="{{ url_for('asset_list', category='servers') }}">Servers</a>
+        <a href="{{ url_for('asset_list', category='firewalls') }}">Firewalls</a>
+        <a href="{{ url_for('asset_list', category='switchs') }}">Switchs</a>
+        <a href="{{ url_for('asset_list', category='other-parts') }}">Other Parts</a>
+      </nav>
+      <form class="logout-form" method="post" action="{{ url_for('logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <span>{{ g.current_user }}</span>
+        <button type="submit">Logout</button>
+      </form>
+    </aside>
+  {% endif %}
+  <main class="main {% if not g.current_user %}main-auth{% endif %}">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="messages">

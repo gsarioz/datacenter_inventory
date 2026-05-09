@@ -9,6 +9,7 @@
 </header>
 
 <form class="form-grid" method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <label>Datacenter
     <select name="datacenter_id" id="datacenter-select" required>
       <option value="">Select datacenter</option>
@@ -67,6 +68,8 @@
   </div>
 </form>
 {% if asset.id %}
-  <form id="delete-form" method="post" action="{{ url_for('asset_delete', category=category, asset_id=asset.id) }}"></form>
+  <form id="delete-form" method="post" action="{{ url_for('asset_delete', category=category, asset_id=asset.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  </form>
 {% endif %}
 {% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Login - Datacenter Inventory{% endblock %}
+{% block content %}
+<section class="login-shell">
+  <form class="login-panel" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="next" value="{{ next }}">
+    <div>
+      <p class="eyebrow">Secure Access</p>
+      <h1>Datacenter Inventory</h1>
+    </div>
+    <label>Username
+      <input name="username" autocomplete="username" autofocus required>
+    </label>
+    <label>Password
+      <input name="password" type="password" autocomplete="current-password" required>
+    </label>
+    <button class="button primary" type="submit">Login</button>
+  </form>
+</section>
+{% endblock %}

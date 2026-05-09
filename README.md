@@ -64,3 +64,5 @@ Uygulama varsayilan olarak `http://127.0.0.1:5000` adresinde acilir.
 - Rack size secenekleri `1U, 2U, 3U, 4U, 6U, 8U`.
 - Ayni rack icinde U cakismasi uygulama tarafinda engellenir.
 - `DATABASE_URL` tanimli degilse uygulama hizli deneme icin `sqlite:///inventory.db` kullanir.
+- Login kullanicilari `INVENTORY_USERS` ile verilir. Format: `admin:password,ops:password`.
+- Tum POST formlari CSRF token kontrolunden gecer.
