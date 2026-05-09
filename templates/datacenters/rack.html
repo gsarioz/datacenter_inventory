@@ -17,7 +17,7 @@
       <div class="rack-row">
         <span class="unit-number">U{{ unit }}</span>
         {% if is_start %}
-          <a class="rack-device {{ asset.category }}" style="--span: {{ asset.rack_size }}" href="{{ url_for('asset_edit', category=asset.category, asset_id=asset.id) }}">
+          <a class="rack-device {{ asset.category }} size-{{ asset.rack_size }}" style="--device-height: {{ (asset.rack_size * 22) - 4 }}px" href="{{ url_for('asset_edit', category=asset.category, asset_id=asset.id) }}">
             <strong>{{ asset.title }}</strong>
             <small>{{ categories[asset.category] }} / {{ asset.host_ip }}</small>
           </a>
