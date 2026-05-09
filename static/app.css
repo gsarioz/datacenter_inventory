@@ -282,6 +282,16 @@ th {
   text-decoration: none;
 }
 
+.table-link {
+  color: var(--brand);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.table-link:hover {
+  text-decoration: underline;
+}
+
 .empty {
   color: var(--muted);
 }

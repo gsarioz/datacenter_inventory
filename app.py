@@ -278,15 +278,22 @@ def register_routes(app):
         )
         rack_rows = (
             db.session.query(
+                Datacenter.id.label("datacenter_id"),
                 Datacenter.codename,
-                Rack.id,
+                Rack.id.label("rack_id"),
                 Rack.name,
                 Rack.total_units,
                 func.coalesce(func.sum(Asset.rack_size), 0).label("used_units"),
             )
             .join(Datacenter, Datacenter.id == Rack.datacenter_id)
             .outerjoin(Asset, Asset.rack_id == Rack.id)
-            .group_by(Datacenter.codename, Rack.id, Rack.name, Rack.total_units)
+            .group_by(
+                Datacenter.id,
+                Datacenter.codename,
+                Rack.id,
+                Rack.name,
+                Rack.total_units,
+            )
             .order_by(Datacenter.codename, Rack.name)
             .all()
         )

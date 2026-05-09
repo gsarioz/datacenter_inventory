@@ -36,7 +36,9 @@
           {% set percent = (row.used_units / row.total_units * 100) if row.total_units else 0 %}
           <tr>
             <td>{{ row.codename }}</td>
-            <td>{{ row.name }}</td>
+            <td>
+              <a class="table-link" href="{{ url_for('rack_detail', datacenter_id=row.datacenter_id, rack_id=row.rack_id) }}">{{ row.name }}</a>
+            </td>
             <td>
               <div class="bar"><span style="width: {{ percent }}%"></span></div>
             </td>
