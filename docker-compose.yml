@@ -5,6 +5,7 @@ services:
     environment:
       FLASK_APP: app.py
       FLASK_DEBUG: "0"
+      SESSION_COOKIE_NAME: __Host-inventory-session
       SESSION_COOKIE_SECURE: "1"
       ENABLE_HSTS: "1"
       SECRET_KEY: 59357d15e32910dfe7ef482c

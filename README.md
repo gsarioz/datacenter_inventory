@@ -66,6 +66,7 @@ Uygulama varsayilan olarak `http://127.0.0.1:5000` adresinde acilir.
 - `DATABASE_URL` tanimli degilse uygulama hizli deneme icin `sqlite:///inventory.db` kullanir.
 - Login kullanicilari `INVENTORY_USERS` ile verilir. Format: `admin:password,ops:password`.
 - Tum POST formlari CSRF token kontrolunden gecer.
+- HTTPS arkasinda calisirken session cookie prefix icin `SESSION_COOKIE_NAME=__Host-inventory-session` kullanin.
 - HTTPS arkasinda calisirken `SESSION_COOKIE_SECURE=1` kullanin.
 - HTTPS arkasinda calisirken HSTS icin `ENABLE_HSTS=1` kullanin.
 - Docker image non-root user ile calisir ve web servisi `gunicorn` ile baslar.

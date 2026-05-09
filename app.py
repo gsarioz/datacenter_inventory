@@ -153,6 +153,14 @@ def create_app():
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
     app.config["SESSION_COOKIE_SECURE"] = env_bool("SESSION_COOKIE_SECURE", False)
+    app.config["SESSION_COOKIE_PATH"] = "/"
+    app.config["SESSION_COOKIE_NAME"] = os.getenv(
+        "SESSION_COOKIE_NAME",
+        "__Host-inventory-session"
+        if app.config["SESSION_COOKIE_SECURE"]
+        else "inventory-session",
+    )
+    validate_session_cookie_config(app)
     app.config["ENABLE_HSTS"] = env_bool("ENABLE_HSTS", False)
     db.init_app(app)
 
@@ -439,6 +447,17 @@ def env_bool(name, default=False):
     if value is None:
         return default
     return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def validate_session_cookie_config(app):
+    cookie_name = app.config["SESSION_COOKIE_NAME"]
+    if cookie_name.startswith("__Host-"):
+        if not app.config["SESSION_COOKIE_SECURE"]:
+            raise RuntimeError("__Host- session cookies require SESSION_COOKIE_SECURE=1.")
+        if app.config.get("SESSION_COOKIE_DOMAIN"):
+            raise RuntimeError("__Host- session cookies must not set SESSION_COOKIE_DOMAIN.")
+        if app.config.get("SESSION_COOKIE_PATH") != "/":
+            raise RuntimeError("__Host- session cookies require SESSION_COOKIE_PATH=/")
 
 
 def authenticate_user(username, password):
