@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ datacenter.codename }} - Datacenter Inventory{% endblock %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">{{ datacenter.country }} / {{ datacenter.building }}</p>
+    <h1>{{ datacenter.name }}</h1>
+  </div>
+  <a class="button" href="{{ url_for('datacenter_edit', datacenter_id=datacenter.id) }}">Settings</a>
+</header>
+
+<section class="detail-grid">
+  <div class="panel">
+    <h2>Identity</h2>
+    <dl class="facts">
+      <dt>Codename</dt><dd>{{ datacenter.codename }}</dd>
+      <dt>FQDN</dt><dd>{{ datacenter.fqdn }}</dd>
+      <dt>Assets</dt><dd>{{ datacenter.assets|length }}</dd>
+    </dl>
+  </div>
+  <div class="panel">
+    <h2>IP Ranges</h2>
+    <div class="chips">
+      {% for ip_range in datacenter.ip_ranges %}
+        <span>{{ ip_range.cidr }}</span>
+      {% else %}
+        <p class="empty">No IP ranges.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>Racks</h2>
+  </div>
+  <div class="rack-cards">
+    {% for rack in datacenter.racks|sort(attribute='name') %}
+      <a class="rack-card" href="{{ url_for('rack_detail', datacenter_id=datacenter.id, rack_id=rack.id) }}">
+        <strong>{{ rack.name }}</strong>
+        <span>{{ rack.used_units }} / {{ rack.total_units }}U used</span>
+        <div class="bar"><span style="width: {{ rack.occupancy_percent }}%"></span></div>
+      </a>
+    {% else %}
+      <p class="empty">No racks.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

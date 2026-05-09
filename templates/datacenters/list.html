@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Datacenters - Datacenter Inventory{% endblock %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Locations</p>
+    <h1>Datacenter</h1>
+  </div>
+  <a class="button primary" href="{{ url_for('datacenter_new') }}">New Datacenter</a>
+</header>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Codename</th>
+          <th>Name</th>
+          <th>Country</th>
+          <th>Building</th>
+          <th>FQDN</th>
+          <th>Racks</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for dc in datacenters %}
+          <tr>
+            <td>{{ dc.codename }}</td>
+            <td>{{ dc.name }}</td>
+            <td>{{ dc.country }}</td>
+            <td>{{ dc.building }}</td>
+            <td>{{ dc.fqdn }}</td>
+            <td>{{ dc.racks|length }}</td>
+            <td class="actions"><a href="{{ url_for('datacenter_detail', datacenter_id=dc.id) }}">Open</a></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="7" class="empty">No datacenter records yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

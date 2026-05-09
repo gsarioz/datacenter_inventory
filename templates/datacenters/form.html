@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if datacenter else 'New' }} Datacenter{% endblock %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Datacenter</p>
+    <h1>{{ 'Edit' if datacenter else 'New' }} Datacenter</h1>
+  </div>
+</header>
+
+<form class="form-grid" method="post">
+  <label>Country
+    <input name="country" value="{{ datacenter.country if datacenter else '' }}" required>
+  </label>
+  <label>Building
+    <input name="building" value="{{ datacenter.building if datacenter else '' }}" required>
+  </label>
+  <label>Datacenter Name
+    <input name="name" value="{{ datacenter.name if datacenter else '' }}" required>
+  </label>
+  <label>Datacenter Codename
+    <input name="codename" value="{{ datacenter.codename if datacenter else '' }}" required>
+  </label>
+  <label class="wide">Datacenter FQDN
+    <input name="fqdn" value="{{ datacenter.fqdn if datacenter else '' }}" required>
+  </label>
+  <label class="wide">Racks
+    <textarea name="racks" rows="6" placeholder="R01&#10;R02" required>{% if datacenter %}{% for rack in datacenter.racks %}{{ rack.name }}{% if not loop.last %}
+{% endif %}{% endfor %}{% endif %}</textarea>
+    <small>One rack per line. New racks are saved as 48U by default.</small>
+  </label>
+  <label class="wide">IP Ranges
+    <textarea name="ip_ranges" rows="5" placeholder="10.10.0.0/24&#10;10.20.0.0/24">{% if datacenter %}{% for ip_range in datacenter.ip_ranges %}{{ ip_range.cidr }}{% if not loop.last %}
+{% endif %}{% endfor %}{% endif %}</textarea>
+  </label>
+  <div class="form-actions wide">
+    <button class="button primary" type="submit">Save</button>
+    <a class="button" href="{{ url_for('datacenters') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

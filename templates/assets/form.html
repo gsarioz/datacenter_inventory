@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ label }} Settings{% endblock %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">{{ label }}</p>
+    <h1>Settings</h1>
+  </div>
+</header>
+
+<form class="form-grid" method="post">
+  <label>Datacenter
+    <select name="datacenter_id" id="datacenter-select" required>
+      <option value="">Select datacenter</option>
+      {% for dc in datacenters %}
+        <option value="{{ dc.id }}" {% if asset.datacenter_id == dc.id %}selected{% endif %}>{{ dc.display_name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Rack
+    <select name="rack_id" id="rack-select" data-selected="{{ asset.rack_id or '' }}" required>
+      <option value="">Select rack</option>
+      {% if selected_datacenter %}
+        {% for rack in selected_datacenter.racks|sort(attribute='name') %}
+          <option value="{{ rack.id }}" {% if asset.rack_id == rack.id %}selected{% endif %}>{{ rack.name }}</option>
+        {% endfor %}
+      {% endif %}
+    </select>
+  </label>
+  <label>Rack Unit
+    <select name="rack_unit" required>
+      <option value="">Select U</option>
+      {% for unit in range(48, 0, -1) %}
+        <option value="{{ unit }}" {% if asset.rack_unit == unit %}selected{% endif %}>U{{ unit }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Rack Size
+    <select name="rack_size" required>
+      <option value="">Select size</option>
+      {% for size in rack_sizes %}
+        <option value="{{ size }}" {% if asset.rack_size == size %}selected{% endif %}>{{ size }}U</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Brand
+    <input name="brand" value="{{ asset.brand or '' }}" required>
+  </label>
+  <label>Model
+    <input name="model" value="{{ asset.model or '' }}" required>
+  </label>
+  <label>Serial No
+    <input name="serial_no" value="{{ asset.serial_no or '' }}" required>
+  </label>
+  <label>Host IP
+    <input name="host_ip" value="{{ asset.host_ip or '' }}" required>
+  </label>
+  <label class="wide">Notes
+    <textarea name="notes" rows="4">{{ asset.notes or '' }}</textarea>
+  </label>
+  <div class="form-actions wide">
+    <button class="button primary" type="submit">Save</button>
+    <a class="button" href="{{ url_for('asset_list', category=category) }}">Cancel</a>
+    {% if asset.id %}
+      <button class="button danger" form="delete-form" type="submit">Delete</button>
+    {% endif %}
+  </div>
+</form>
+{% if asset.id %}
+  <form id="delete-form" method="post" action="{{ url_for('asset_delete', category=category, asset_id=asset.id) }}"></form>
+{% endif %}
+{% endblock %}

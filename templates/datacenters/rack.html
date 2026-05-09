@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ datacenter.codename }} {{ rack.name }} - Rack{% endblock %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">{{ datacenter.codename }}</p>
+    <h1>{{ rack.name }}</h1>
+  </div>
+  <a class="button" href="{{ url_for('datacenter_detail', datacenter_id=datacenter.id) }}">Back</a>
+</header>
+
+<section class="rack-layout">
+  <div class="rack-shell" style="--rack-units: {{ rack.total_units }}">
+    {% for unit in range(rack.total_units, 0, -1) %}
+      {% set asset = unit_map[unit] %}
+      {% set is_start = asset and asset.rack_unit + asset.rack_size - 1 == unit %}
+      <div class="rack-row">
+        <span class="unit-number">U{{ unit }}</span>
+        {% if is_start %}
+          <a class="rack-device {{ asset.category }}" style="--span: {{ asset.rack_size }}" href="{{ url_for('asset_edit', category=asset.category, asset_id=asset.id) }}">
+            <strong>{{ asset.title }}</strong>
+            <small>{{ categories[asset.category] }} / {{ asset.host_ip }}</small>
+          </a>
+        {% elif not asset %}
+          <span class="rack-empty"></span>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <aside class="panel">
+    <h2>Installed Assets</h2>
+    <div class="asset-stack">
+      {% for asset in assets %}
+        <a href="{{ url_for('asset_edit', category=asset.category, asset_id=asset.id) }}">
+          <strong>{{ asset.unit_label }}</strong>
+          <span>{{ asset.title }}</span>
+          <small>{{ asset.host_ip }}</small>
+        </a>
+      {% else %}
+        <p class="empty">This rack is empty.</p>
+      {% endfor %}
+    </div>
+  </aside>
+</section>
+{% endblock %}

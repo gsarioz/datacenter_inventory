@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ label }} - Datacenter Inventory{% endblock %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Assets</p>
+    <h1>{{ label }}</h1>
+  </div>
+  <a class="button primary" href="{{ url_for('asset_new', category=category) }}">New {{ label }}</a>
+</header>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Datacenter</th>
+          <th>Rack</th>
+          <th>Unit</th>
+          <th>Brand</th>
+          <th>Model</th>
+          <th>Serial No</th>
+          <th>Host IP</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for asset in assets %}
+          <tr>
+            <td>{{ asset.datacenter.codename }}</td>
+            <td>{{ asset.rack.name }}</td>
+            <td>{{ asset.unit_label }}</td>
+            <td>{{ asset.brand }}</td>
+            <td>{{ asset.model }}</td>
+            <td>{{ asset.serial_no }}</td>
+            <td>{{ asset.host_ip }}</td>
+            <td class="actions"><a href="{{ url_for('asset_edit', category=category, asset_id=asset.id) }}">Settings</a></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="8" class="empty">No assets yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
