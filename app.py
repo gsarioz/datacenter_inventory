@@ -3,9 +3,20 @@ import os
 import secrets
 from datetime import datetime
 from ipaddress import ip_address, ip_network
+from time import time
 
 from dotenv import load_dotenv
-from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for
+from flask import (
+    Flask,
+    abort,
+    flash,
+    g,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 from werkzeug.security import check_password_hash
@@ -23,6 +34,9 @@ ASSET_CATEGORIES = {
 }
 
 RACK_SIZES = (1, 2, 3, 4, 6, 8)
+LOGIN_ATTEMPTS = {}
+LOGIN_RATE_LIMIT = 5
+LOGIN_RATE_WINDOW_SECONDS = 300
 
 
 class Datacenter(db.Model):
@@ -128,13 +142,17 @@ class Asset(db.Model):
 
 def create_app():
     app = Flask(__name__)
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev")
+    secret_key = os.getenv("SECRET_KEY", "").strip()
+    if not secret_key:
+        raise RuntimeError("SECRET_KEY environment variable is required.")
+    app.config["SECRET_KEY"] = secret_key
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
         "DATABASE_URL", "sqlite:///inventory.db"
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_COOKIE_SECURE"] = env_bool("SESSION_COOKIE_SECURE", False)
     db.init_app(app)
 
     register_security(app)
@@ -166,6 +184,25 @@ def register_security(app):
     def inject_security_helpers():
         return {"csrf_token": csrf_token}
 
+    @app.after_request
+    def add_security_headers(response):
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "same-origin")
+        response.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; "
+            "script-src 'self'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; "
+            "font-src 'self'; "
+            "base-uri 'self'; "
+            "form-action 'self'; "
+            "frame-ancestors 'none'",
+        )
+        return response
+
 
 def register_cli(app):
     @app.cli.command("init-db")
@@ -182,17 +219,28 @@ def register_routes(app):
             return redirect(url_for("dashboard"))
 
         if request.method == "POST":
+            if login_rate_limited():
+                flash("Too many login attempts. Please wait and try again.", "danger")
+                return render_template(
+                    "login.html",
+                    next=valid_redirect_target(request.form.get("next")),
+                ), 429
+
             username = request.form.get("username", "").strip()
             password = request.form.get("password", "")
             if authenticate_user(username, password):
+                clear_login_failures()
                 session.clear()
                 session["username"] = username
                 csrf_token()
                 flash("Logged in.", "success")
                 return redirect(valid_redirect_target(request.form.get("next")))
+            record_login_failure()
             flash("Invalid username or password.", "danger")
 
-        return render_template("login.html", next=valid_redirect_target(request.args.get("next")))
+        return render_template(
+            "login.html", next=valid_redirect_target(request.args.get("next"))
+        )
 
     @app.post("/logout")
     def logout():
@@ -378,6 +426,13 @@ def configured_users():
     return users
 
 
+def env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 def authenticate_user(username, password):
     stored_password = configured_users().get(username)
     if not stored_password:
@@ -390,6 +445,35 @@ def authenticate_user(username, password):
             return False
 
     return hmac.compare_digest(stored_password, password)
+
+
+def login_attempt_key():
+    return request.remote_addr or "unknown"
+
+
+def current_login_failures():
+    now = time()
+    attempts = [
+        attempted_at
+        for attempted_at in LOGIN_ATTEMPTS.get(login_attempt_key(), [])
+        if now - attempted_at < LOGIN_RATE_WINDOW_SECONDS
+    ]
+    LOGIN_ATTEMPTS[login_attempt_key()] = attempts
+    return attempts
+
+
+def login_rate_limited():
+    return len(current_login_failures()) >= LOGIN_RATE_LIMIT
+
+
+def record_login_failure():
+    attempts = current_login_failures()
+    attempts.append(time())
+    LOGIN_ATTEMPTS[login_attempt_key()] = attempts
+
+
+def clear_login_failures():
+    LOGIN_ATTEMPTS.pop(login_attempt_key(), None)
 
 
 def csrf_token():
@@ -588,4 +672,4 @@ app = create_app()
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(debug=env_bool("FLASK_DEBUG", False))

@@ -4,7 +4,7 @@ services:
     container_name: inventory-web
     environment:
       FLASK_APP: app.py
-      FLASK_DEBUG: "1"
+      FLASK_DEBUG: "0"
       SECRET_KEY: 59357d15e32910dfe7ef482c
       INVENTORY_USERS: gugoadmin:Bodrum782!
       DATABASE_URL: mariadb+pymysql://inventory-user:da4ecff1fd4aa0da37a3e75c@mariadb:3306/inventory-db
@@ -15,7 +15,7 @@ services:
         condition: service_healthy
     command: >
       sh -c "flask --app app init-db &&
-      flask --app app run --host=0.0.0.0 --port=5000"
+      gunicorn --bind 0.0.0.0:5000 --workers 2 app:app"
 
   mariadb:
     image: mariadb:11.4
