@@ -5,8 +5,8 @@ services:
     environment:
       FLASK_APP: app.py
       FLASK_DEBUG: "1"
-      SECRET_KEY: change-me
-      DATABASE_URL: mariadb+pymysql://inventory:inventory@mariadb:3306/datacenter_inventory
+      SECRET_KEY: 59357d15e32910dfe7ef482c
+      DATABASE_URL: mariadb+pymysql://inventory-user:da4ecff1fd4aa0da37a3e75c@mariadb:3306/inventory-db
     ports:
       - "5000:5000"
     depends_on:
@@ -20,12 +20,10 @@ services:
     image: mariadb:11.4
     container_name: inventory-mariadb
     environment:
-      MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: datacenter_inventory
-      MARIADB_USER: inventory
-      MARIADB_PASSWORD: inventory
-    ports:
-      - "3306:3306"
+      MARIADB_ROOT_PASSWORD: a923d241d4c3be2948d42d37
+      MARIADB_DATABASE: inventory-db
+      MARIADB_USER: inventory-user
+      MARIADB_PASSWORD: da4ecff1fd4aa0da37a3e75c
     volumes:
       - mariadb_data:/var/lib/mysql
     healthcheck:
