@@ -22,25 +22,35 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-2. MariaDB'yi baslatin:
+2. Uygulamayi ve MariaDB'yi Docker ile baslatin:
 
 ```powershell
 docker compose up -d
 ```
 
-3. `.env.example` dosyasini `.env` olarak kopyalayin.
+Uygulama `http://127.0.0.1:5000` adresinde acilir. `inventory-web` servisi ilk acilista tablolari otomatik olusturur.
+
+### Lokal Flask ile calistirma
+
+Docker yerine lokal Python ile calistirmak isterseniz `.env.example` dosyasini `.env` olarak kopyalayin.
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-4. Tablolari olusturun:
+MariaDB servisini ayaga kaldirin:
+
+```powershell
+docker compose up -d mariadb
+```
+
+Tablolari olusturun:
 
 ```powershell
 flask --app app init-db
 ```
 
-5. Uygulamayi calistirin:
+Uygulamayi calistirin:
 
 ```powershell
 flask --app app run

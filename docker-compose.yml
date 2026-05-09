@@ -1,4 +1,21 @@
 services:
+  inventory-web:
+    build: .
+    container_name: inventory-web
+    environment:
+      FLASK_APP: app.py
+      FLASK_DEBUG: "1"
+      SECRET_KEY: change-me
+      DATABASE_URL: mariadb+pymysql://inventory:inventory@mariadb:3306/datacenter_inventory
+    ports:
+      - "5000:5000"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    command: >
+      sh -c "flask --app app init-db &&
+      flask --app app run --host=0.0.0.0 --port=5000"
+
   mariadb:
     image: mariadb:11.4
     container_name: inventory-mariadb
@@ -11,6 +28,11 @@ services:
       - "3306:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
 volumes:
   mariadb_data:
