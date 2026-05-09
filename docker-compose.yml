@@ -8,7 +8,7 @@ services:
       SECRET_KEY: 59357d15e32910dfe7ef482c
       DATABASE_URL: mariadb+pymysql://inventory-user:da4ecff1fd4aa0da37a3e75c@mariadb:3306/inventory-db
     ports:
-      - "5000:5000"
+      - "5003:5000"
     depends_on:
       mariadb:
         condition: service_healthy
