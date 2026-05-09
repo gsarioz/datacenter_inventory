@@ -111,6 +111,11 @@ class Asset(db.Model):
         return f"{self.brand} {self.model}"
 
     @property
+    def rack_label(self):
+        category = ASSET_CATEGORIES.get(self.category, self.category)
+        return f"{category} - {self.title} - {self.host_ip}"
+
+    @property
     def unit_label(self):
         end_unit = self.rack_unit + self.rack_size - 1
         if self.rack_size == 1:

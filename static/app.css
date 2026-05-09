@@ -410,23 +410,14 @@ th {
   box-shadow: 0 8px 18px rgba(0,0,0,0.25);
 }
 
-.rack-device strong,
-.rack-device small {
+.rack-device strong {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.rack-device small {
-  opacity: 0.9;
-}
-
 .rack-device.size-1 {
   padding-block: 1px;
-}
-
-.rack-device.size-1 small {
-  display: none;
 }
 
 .rack-device.size-1 strong {
