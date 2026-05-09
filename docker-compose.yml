@@ -5,6 +5,7 @@ services:
     environment:
       FLASK_APP: app.py
       FLASK_DEBUG: "0"
+      SESSION_COOKIE_SECURE: "1"
       SECRET_KEY: 59357d15e32910dfe7ef482c
       INVENTORY_USERS: gugoadmin:Bodrum782!
       DATABASE_URL: mariadb+pymysql://inventory-user:da4ecff1fd4aa0da37a3e75c@mariadb:3306/inventory-db
